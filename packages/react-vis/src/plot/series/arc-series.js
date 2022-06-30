@@ -68,14 +68,16 @@ function modifyRow(row) {
 }
 
 class ArcSeries extends AbstractSeries {
-  constructor(props) {
-    super(props);
-    const scaleProps = this._getAllScaleProps(props);
-    this.state = {scaleProps};
+  static getDerivedStateFromProps(props) {
+    return {
+      scaleProps: ArcSeries.getAllScaleProps(props)
+    }
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    this.setState({scaleProps: this._getAllScaleProps(nextProps)});
+  constructor(props) {
+    super(props);
+    const scaleProps = ArcSeries.getAllScaleProps(props);
+    this.state = {scaleProps};
   }
 
   /**
@@ -85,8 +87,8 @@ class ArcSeries extends AbstractSeries {
    * @returns {Object} Map of scales.
    * @private
    */
-  _getAllScaleProps(props) {
-    const defaultScaleProps = this._getDefaultScaleProps(props);
+  static getAllScaleProps(props) {
+    const defaultScaleProps = ArcSeries.getDefaultScaleProps(props);
     const userScaleProps = extractScalePropsFromProps(props, ATTRIBUTES);
     const missingScaleProps = getMissingScaleProps(
       {
@@ -110,7 +112,7 @@ class ArcSeries extends AbstractSeries {
    * @returns {Object} Defaults.
    * @private
    */
-  _getDefaultScaleProps(props) {
+  static getDefaultScaleProps(props) {
     const {innerWidth, innerHeight} = props;
     const radius = Math.min(innerWidth / 2, innerHeight / 2);
     return {

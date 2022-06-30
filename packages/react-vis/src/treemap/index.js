@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import {
   hierarchy,
@@ -100,7 +100,7 @@ function Treemap(props) {
    * @returns {Array} Array of nodes.
    * @private
    */
-  function _getNodesToRender() {
+  const nodes = useMemo(() => {
     const {innerWidth, innerHeight} = innerDimensions;
     const {data, mode, padding, sortFunction, getSize} = props;
     if (!data) {
@@ -149,10 +149,9 @@ function Treemap(props) {
       .sum(getSize)
       .sort((a, b) => sortFunction(a, b, getSize));
     return treemapingFunction(structuredInput).descendants();
-  }
+  }, [innerDimensions, props.data, props.mode, props.padding, props.sortFunction, props.getSize])
 
   const {renderMode} = props;
-  const nodes = _getNodesToRender();
   const TreemapElement = renderMode === 'SVG' ? TreemapSVG : TreemapDOM;
 
   return <TreemapElement {...props} nodes={nodes} scales={scales} />;

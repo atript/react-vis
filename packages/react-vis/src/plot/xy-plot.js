@@ -133,34 +133,37 @@ class XYPlot extends React.Component {
     };
   }
 
+  static getDerivedStateFromProps(props, state) {
+    const children = getSeriesChildren(props.children);
+    const nextData = getStackedData(children, props.stackBy);
+    const { scaleMixins } = state;
+    const nextScaleMixins = XYPlot.getScaleMixins(nextData, props);
+    if (
+      !checkIfMixinsAreEqual(
+        nextScaleMixins,
+        scaleMixins,
+        props.hasTreeStructure
+      )
+    ) {
+      return {
+        ...state,
+        scaleMixins: nextScaleMixins,
+        data: nextData
+      };
+    }
+
+    return state;
+  }
+
   constructor(props) {
     super(props);
     const {stackBy} = props;
     const children = getSeriesChildren(props.children);
     const data = getStackedData(children, stackBy);
     this.state = {
-      scaleMixins: this._getScaleMixins(data, props),
+      scaleMixins: XYPlot.getScaleMixins(data, props),
       data
     };
-  }
-
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    const children = getSeriesChildren(nextProps.children);
-    const nextData = getStackedData(children, nextProps.stackBy);
-    const {scaleMixins} = this.state;
-    const nextScaleMixins = this._getScaleMixins(nextData, nextProps);
-    if (
-      !checkIfMixinsAreEqual(
-        nextScaleMixins,
-        scaleMixins,
-        nextProps.hasTreeStructure
-      )
-    ) {
-      this.setState({
-        scaleMixins: nextScaleMixins,
-        data: nextData
-      });
-    }
   }
 
   /**
@@ -231,7 +234,7 @@ class XYPlot extends React.Component {
    * @returns {Object} Defaults.
    * @private
    */
-  _getDefaultScaleProps(props) {
+  static getDefaultScaleProps(props) {
     const {innerWidth, innerHeight} = getInnerDimensions(
       props,
       DEFAULT_MARGINS
@@ -262,11 +265,11 @@ class XYPlot extends React.Component {
    * @returns {Object} Map of scale-related props.
    * @private
    */
-  _getScaleMixins(data, props) {
+  static getScaleMixins(data, props) {
     const filteredData = data.filter(d => d);
     const allData = [].concat(...filteredData);
 
-    const defaultScaleProps = this._getDefaultScaleProps(props);
+    const defaultScaleProps = XYPlot.getDefaultScaleProps(props);
     const optionalScaleProps = getOptionalScaleProps(props);
     const userScaleProps = extractScalePropsFromProps(props, ATTRIBUTES);
     const missingScaleProps = getMissingScaleProps(
@@ -464,25 +467,6 @@ class XYPlot extends React.Component {
       const component = this[`series${index}`];
       if (component && component.onParentTouchMove) {
         component.onParentTouchMove(event);
-      }
-    });
-  };
-
-  /**
-   * Trigger touch-start related callbacks if they are available.
-   * @param {React.SyntheticEvent} event Touch start event.
-   * @private
-   */
-  _touchStartHandler = event => {
-    const {onTouchStart, children} = this.props;
-    if (onTouchStart) {
-      onTouchStart(event);
-    }
-    const seriesChildren = getSeriesChildren(children);
-    seriesChildren.forEach((child, index) => {
-      const component = this[`series${index}`];
-      if (component && component.onParentTouchStart) {
-        component.onParentTouchStart(event);
       }
     });
   };

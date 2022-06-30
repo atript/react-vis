@@ -88,9 +88,9 @@ describe('Treemap', () => {
       'binary'
     ].forEach(mode => {
       $.setProps({
-        mode,
+        ...TREEMAP_PROPS,
         sortFunction: (a, b) => b.value - a.value,
-        ...TREEMAP_PROPS
+        mode,
       });
       expect($.find('.rv-treemap').text()).toBe(expectedText);
       $.setProps({sortFunction: (a, b) => a.value - b.value});
